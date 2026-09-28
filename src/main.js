@@ -76,7 +76,7 @@ const rim = new THREE.DirectionalLight(0xffffff, 0.5); rim.position.set(8, 3, -7
 
 // ---------- Materials ----------
 const METALS = {
-  gold:   { color: 0xeed283, roughness: 0.05 },
+  gold:   { color: 0xf2d4a2, roughness: 0.05 },   // champagne 14k: hue ≈38°, sat ≈0.33 (per Joyce's reference; was 0xeed283, 8° greener)
   silver: { color: 0xc9cbcf, roughness: 0.06 },
 };
 const bandMat = new THREE.MeshPhysicalMaterial({
