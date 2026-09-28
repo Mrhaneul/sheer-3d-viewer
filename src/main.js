@@ -4,7 +4,7 @@ import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshTransmissionMaterialImpl } from './MeshTransmissionMaterialImpl.js';
 import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
-import studioHdrUrl from '../assets/studio_small_03_1k.hdr?url';   // Poly Haven studio_small_03 (CC0), inlined at build
+import studioHdrUrl from '../assets/studio_small_03_1k.hdr?inline';   // Poly Haven studio_small_03 (CC0), forced inline as a data URI
 
 const stage = document.getElementById('stage');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -56,6 +56,10 @@ new HDRLoader().load(studioHdrUrl, (hdr) => {
   scene.environmentIntensity = 1.0;
   scene.environmentRotation = new THREE.Euler(0, Math.PI * 0.35, 0);
   hdr.dispose();
+}, undefined, (err) => {
+  // HDRI failed to load: keep the room fallback but lift it so the metal never reads dark
+  scene.environmentIntensity = 1.9;
+  try { console.warn('Studio HDRI failed to load; using fallback environment', err); } catch (e) {}
 });
 
 // Separate environment for the stones (neutral 'diamond studio')
