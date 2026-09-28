@@ -96,11 +96,11 @@ const stonePhysMat = new THREE.MeshPhysicalMaterial({
 // Deep stone material: crown (front faces) refracts an image of the pavilion (back faces) rendered as mirror facets.
 const FBO_SIZE = 1024;
 const fboMain = new THREE.WebGLRenderTarget(FBO_SIZE, FBO_SIZE, { type: THREE.HalfFloatType });
-const stoneMat = new MeshTransmissionMaterialImpl(12, false);   // 12 samples: blends chromatic aberration into smooth fire (6 left detached R/B dots)
+const stoneMat = new MeshTransmissionMaterialImpl(6, false);   // 6 samples (12 was tried for 'dot' artifacts that turned out to be bead-prong geometry; reverted for mobile perf)
 Object.assign(stoneMat, {
   color: new THREE.Color(0xffffff), roughness: 0.0, metalness: 0,
   ior: 2.2, thickness: 0.3, chromaticAberration: 0.55,   // small thickness keeps samples inside the stone (no gold spill); aberration = fire
-  anisotropicBlur: 0.15, distortion: 0.0,   // slight blur smears residual aberration fireflies
+  anisotropicBlur: 0.0, distortion: 0.0,
   envMap: gemEnv, envMapIntensity: 1.5, specularIntensity: 1.0,
   clearcoat: 0.4, clearcoatRoughness: 0.0,
   attenuationColor: new THREE.Color(0xffffff), attenuationDistance: 10,
@@ -137,9 +137,9 @@ const STONES = 7;
 const PITCH = THREE.MathUtils.degToRad(17.8);
 const S_A0 = THREE.MathUtils.degToRad(129);
 const SEAM = S_A0 + PITCH * (STONES - 1) + THREE.MathUtils.degToRad(11);
-const CUT_R = 0.86;                       // scoop radius (axis across the band width)
+const CUT_R = 1.07;                       // scoop radius; 1.07 makes adjacent scoops meet in cusps (continuous scallop, per Mejuri side-view reference 2026-09-28; 0.86 left flats between stones)
 const CUT_C = R_OUT + 0.46;               // scoop centre outside the band → shallow dip, small flat between scoops
-const STONE_C = R_OUT - 0.34;             // girdle just under the scoop rim, table slightly proud
+const STONE_C = R_OUT - 0.50;             // recessed: table ~0.27mm below the cusps so the metal envelopes the stone (was -0.34, table proud)
 const stoneAngles = []; for (let i = 0; i < STONES; i++) stoneAngles.push(S_A0 + PITCH * i);
 
 // ---------- Pavé section: scalloped side profile extruded across the width ----------
@@ -156,9 +156,9 @@ const pts = [];
 const STEP = THREE.MathUtils.degToRad(0.35);
 for (let t = A_START; t <= SEAM + 1e-9; t += STEP) { const rr = outerRadiusAt(t); pts.push(new THREE.Vector2(rr * Math.cos(t), rr * Math.sin(t))); }
 for (let t = SEAM; t >= A_START - 1e-9; t -= STEP * 3) pts.push(new THREE.Vector2(R_IN * Math.cos(t), R_IN * Math.sin(t)));
-const BEV = 0.09;   // must stay well below the scoop radius or the offset outline pinches into fins
+const BEV = 0.14;   // rounder band edges per Joyce 2026-09-28; must stay well below the scoop radius (1.07) or the offset outline pinches into fins
 const paveGeo = new THREE.ExtrudeGeometry(new THREE.Shape(pts), {
-  depth: WIDTH - 2 * BEV, bevelEnabled: true, bevelThickness: BEV, bevelSize: BEV, bevelOffset: -BEV, bevelSegments: 4, steps: 1,
+  depth: WIDTH - 2 * BEV, bevelEnabled: true, bevelThickness: BEV, bevelSize: BEV, bevelOffset: -BEV, bevelSegments: 6, steps: 1,
 });
 paveGeo.translate(0, 0, -(WIDTH - 2 * BEV) / 2);
 const paveSmooth = toCreasedNormals(paveGeo, THREE.MathUtils.degToRad(32));
