@@ -96,11 +96,11 @@ const stonePhysMat = new THREE.MeshPhysicalMaterial({
 // Deep stone material: crown (front faces) refracts an image of the pavilion (back faces) rendered as mirror facets.
 const FBO_SIZE = 1024;
 const fboMain = new THREE.WebGLRenderTarget(FBO_SIZE, FBO_SIZE, { type: THREE.HalfFloatType });
-const stoneMat = new MeshTransmissionMaterialImpl(6, false);
+const stoneMat = new MeshTransmissionMaterialImpl(12, false);   // 12 samples: blends chromatic aberration into smooth fire (6 left detached R/B dots)
 Object.assign(stoneMat, {
   color: new THREE.Color(0xffffff), roughness: 0.0, metalness: 0,
   ior: 2.2, thickness: 0.3, chromaticAberration: 0.55,   // small thickness keeps samples inside the stone (no gold spill); aberration = fire
-  anisotropicBlur: 0.0, distortion: 0.0,
+  anisotropicBlur: 0.15, distortion: 0.0,   // slight blur smears residual aberration fireflies
   envMap: gemEnv, envMapIntensity: 1.5, specularIntensity: 1.0,
   clearcoat: 0.4, clearcoatRoughness: 0.0,
   attenuationColor: new THREE.Color(0xffffff), attenuationDistance: 10,
