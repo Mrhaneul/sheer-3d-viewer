@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KD-116 — lariat earring (r186)</title>
+<style>
+  :root{ --paper:#f4f3f0; --paper-deep:#e5e4e0; --ink:#1c1b19; --ink-soft:#8a8880; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:radial-gradient(120% 90% at 50% 30%, var(--paper) 0%, var(--paper-deep) 100%);color:var(--ink);-webkit-font-smoothing:antialiased}
+  #stage{position:fixed;inset:0;touch-action:none;cursor:grab}
+  .frame{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:28px 30px}
+  .head .brand{font-size:12px;letter-spacing:.34em;font-weight:500}
+  .head .piece{margin-top:10px;font-size:26px;font-weight:300}
+  .head .piece span{color:var(--ink-soft)}
+  .foot{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .spec{font-size:12.5px;line-height:1.7;color:var(--ink-soft);max-width:300px}
+  .spec b{color:var(--ink);font-weight:500}
+  .metals{pointer-events:auto;display:flex;gap:22px}
+  .metals button{appearance:none;border:0;background:none;font:inherit;font-size:12.5px;letter-spacing:.06em;color:var(--ink-soft);cursor:pointer;padding:6px 0;border-bottom:1px solid transparent;transition:color .25s,border-color .25s}
+  .metals button:hover{color:var(--ink)}
+  .metals button.active{color:var(--ink);border-bottom-color:var(--ink)}
+  .hint{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);font-size:12px;color:var(--ink-soft);letter-spacing:.04em;transition:opacity .8s;pointer-events:none}
+  .hint.gone{opacity:0}
+  .tag{position:fixed;top:30px;right:30px;font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-align:right;line-height:1.6;pointer-events:none}
+  @media (max-width:640px){ .frame{padding:20px} .head .piece{font-size:20px} .tag{top:20px;right:20px} .spec{font-size:11.5px} .hint{bottom:110px} }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<div class="frame">
+  <div class="head">
+    <div class="brand">SHEER OBJECTS</div>
+    <div class="piece">KD-116 <span>lariat earring</span></div>
+  </div>
+  <div class="foot">
+    <div class="spec">
+      <b>12 mm hoop</b>, 1.7 × 1.5 mm band, 5 mm hinged post,<br>
+      seven 1.5 mm stones in scooped seats (0.21 ct the pair).<br>
+      Built to the CAD sheet dimensions.
+    </div>
+    <div class="metals" role="group" aria-label="Metal finish">
+      <button id="btnGold" class="active">14k gold vermeil</button>
+      <button id="btnSilver">Sterling silver</button>
+    </div>
+  </div>
+</div>
+<div class="tag">Three.js r186 build<br>studio HDRI · mirror-pavilion stones</div>
+<div class="hint" id="hint">Drag to rotate. Scroll or pinch to zoom.</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
