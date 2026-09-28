@@ -137,9 +137,9 @@ const STONES = 7;
 const PITCH = THREE.MathUtils.degToRad(17.8);
 const S_A0 = THREE.MathUtils.degToRad(129);
 const SEAM = S_A0 + PITCH * (STONES - 1) + THREE.MathUtils.degToRad(11);
-const CUT_R = 1.07;                       // scoop radius; 1.07 makes adjacent scoops meet in cusps (continuous scallop, per Mejuri side-view reference 2026-09-28; 0.86 left flats between stones)
-const CUT_C = R_OUT + 0.46;               // scoop centre outside the band → shallow dip, small flat between scoops
-const STONE_C = R_OUT - 0.50;             // recessed: table ~0.27mm below the cusps so the metal envelopes the stone (was -0.34, table proud)
+const CUT_R = 1.69;                       // scoop radius; with CUT_C below gives a SHALLOW continuous scallop (0.35mm dip), per Mejuri refs 2026-09-28 v2
+const CUT_C = R_OUT + 1.34;               // paired with CUT_R 1.69: adjacent scoops meet in cusps at R_OUT, valley at 5.65
+const STONE_C = R_OUT - 0.22;             // flush-to-proud: table ≈6.0 level with cusp tops, girdle bulges into the scoop (refs show stones NOT recessed; -0.50 recessed pass rejected)
 const stoneAngles = []; for (let i = 0; i < STONES; i++) stoneAngles.push(S_A0 + PITCH * i);
 
 // ---------- Pavé section: scalloped side profile extruded across the width ----------
@@ -254,17 +254,17 @@ for (const a of stoneAngles) {
   s.rotateY(a * 3.1);
   jewel.add(s);
 }
-// Bead prongs at the cusps between scoops, both edges of the band.
-// OFF per Joyce/Haneul review 2026-09-28 (read as stray dots, not prongs). Flip SHOW_BEADS to restore;
-// real prong geometry will come from the Karma CAD anyway.
-const SHOW_BEADS = false;
+// Prong claw beads at the cusps between stones — these are the claws gripping adjacent girdles in the
+// Mejuri references (2026-09-28 v2). Re-enabled after the earlier removal: with wide flats they read as
+// stray dots; on the continuous shallow scallop with proud stones they read as prongs.
+const SHOW_BEADS = true;
 if (SHOW_BEADS) {
-  const beadGeo = new THREE.SphereGeometry(0.15, 16, 12);
+  const beadGeo = new THREE.SphereGeometry(0.13, 16, 12);
   for (let i = 0; i <= STONES; i++) {
     const a = S_A0 + PITCH * (i - 0.5), dir = radial(a);
-    [-0.62, 0.62].forEach(z => {
+    [-0.45, 0.45].forEach(z => {
       const p = new THREE.Mesh(beadGeo, bandMat);
-      p.position.copy(dir).multiplyScalar(R_OUT + 0.02); p.position.z = z;
+      p.position.copy(dir).multiplyScalar(R_OUT - 0.06); p.position.z = z;   // half-sunk into the cusp, tips just proud, hugging the stone rims
       jewel.add(p);
     });
   }
