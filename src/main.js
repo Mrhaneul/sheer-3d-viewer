@@ -254,15 +254,20 @@ for (const a of stoneAngles) {
   s.rotateY(a * 3.1);
   jewel.add(s);
 }
-// Bead prongs at the cusps between scoops, both edges of the band
-const beadGeo = new THREE.SphereGeometry(0.15, 16, 12);
-for (let i = 0; i <= STONES; i++) {
-  const a = S_A0 + PITCH * (i - 0.5), dir = radial(a);
-  [-0.62, 0.62].forEach(z => {
-    const p = new THREE.Mesh(beadGeo, bandMat);
-    p.position.copy(dir).multiplyScalar(R_OUT + 0.02); p.position.z = z;
-    jewel.add(p);
-  });
+// Bead prongs at the cusps between scoops, both edges of the band.
+// OFF per Joyce/Haneul review 2026-09-28 (read as stray dots, not prongs). Flip SHOW_BEADS to restore;
+// real prong geometry will come from the Karma CAD anyway.
+const SHOW_BEADS = false;
+if (SHOW_BEADS) {
+  const beadGeo = new THREE.SphereGeometry(0.15, 16, 12);
+  for (let i = 0; i <= STONES; i++) {
+    const a = S_A0 + PITCH * (i - 0.5), dir = radial(a);
+    [-0.62, 0.62].forEach(z => {
+      const p = new THREE.Mesh(beadGeo, bandMat);
+      p.position.copy(dir).multiplyScalar(R_OUT + 0.02); p.position.z = z;
+      jewel.add(p);
+    });
+  }
 }
 
 jewel.rotation.set(0, 0, 0);
