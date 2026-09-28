@@ -3,8 +3,6 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshTransmissionMaterialImpl } from './MeshTransmissionMaterialImpl.js';
-import { HDRLoader } from 'three/addons/loaders/HDRLoader.js';
-import studioHdrUrl from '../assets/studio_small_03_1k.hdr?inline';   // Poly Haven studio_small_03 (CC0), forced inline as a data URI
 
 const stage = document.getElementById('stage');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -47,20 +45,10 @@ box(6, 0.4, 0xffffff, 0, 6.9, 2, -Math.PI / 2, 0);                 // thin brigh
 box(1.2, 5, 0xffffff, -6.9, 1, 1.5, 0, Math.PI / 2);                // tall key strip, left
 box(4, 3, 0x333333, 0, 1, -6.9, 0, 0);                              // soft dark patch behind → gentle bands, not black
 box(5, 4, 0xffffff, 0, 1.5, 6.9, 0, Math.PI);                       // large front softbox → high-key fill like the reference
-scene.environment = pmrem.fromScene(envScene, 0.0).texture;   // fallback until the HDRI decodes
+scene.environment = pmrem.fromScene(envScene, 0.0).texture;
 scene.environmentIntensity = 1.35;
-new HDRLoader().load(studioHdrUrl, (hdr) => {
-  hdr.mapping = THREE.EquirectangularReflectionMapping;
-  const hdrEnv = pmrem.fromEquirectangular(hdr).texture;
-  scene.environment = hdrEnv;                                   // real photographed studio for the gold
-  scene.environmentIntensity = 1.0;
-  scene.environmentRotation = new THREE.Euler(0, Math.PI * 0.35, 0);
-  hdr.dispose();
-}, undefined, (err) => {
-  // HDRI failed to load: keep the room fallback but lift it so the metal never reads dark
-  scene.environmentIntensity = 1.9;
-  try { console.warn('Studio HDRI failed to load; using fallback environment', err); } catch (e) {}
-});
+// NOTE: a photographed HDRI (Poly Haven studio_small_03) was tried and rejected: it is a dark studio, and
+// near-mirror gold reflects its black walls. A bright synthetic room with a few crisp softboxes reads better.
 
 // Separate environment for the stones (neutral 'diamond studio')
 const gemEnvScene = new THREE.Scene();
