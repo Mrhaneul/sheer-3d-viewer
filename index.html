@@ -1,29 +1,30 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>KD-116 — lariat earring (r186)</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KD-116 · Pavé Huggie · SHEER OBJECTS</title>
 <style>
-  :root{ --paper:#f4f3f0; --paper-deep:#e5e4e0; --ink:#1c1b19; --ink-soft:#8a8880; }
+  :root{ --bg:#f4f2ee; --ink:#1c1a17; --ink-soft:#8a8880; --line:#dcd8d0; }
   *{margin:0;padding:0;box-sizing:border-box}
-  html,body{height:100%;overflow:hidden}
-  body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:radial-gradient(120% 90% at 50% 30%, var(--paper) 0%, var(--paper-deep) 100%);color:var(--ink);-webkit-font-smoothing:antialiased}
-  #stage{position:fixed;inset:0;touch-action:none;cursor:grab}
-  .frame{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:28px 30px}
-  .head .brand{font-size:12px;letter-spacing:.34em;font-weight:500}
-  .head .piece{margin-top:10px;font-size:26px;font-weight:300}
-  .head .piece span{color:var(--ink-soft)}
-  .foot{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  .spec{font-size:12.5px;line-height:1.7;color:var(--ink-soft);max-width:300px}
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--ink);font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;overflow:hidden}
+  #stage{position:fixed;inset:0}
+  canvas{display:block}
+  .frame{position:fixed;inset:0;pointer-events:none;padding:28px 32px;display:flex;flex-direction:column;justify-content:space-between}
+  .head{display:flex;justify-content:space-between;align-items:flex-start}
+  .head .brand{font-size:12px;letter-spacing:.34em;color:var(--ink-soft)}
+  .head .piece{margin-top:6px;font-size:24px;font-weight:300;letter-spacing:.02em}
+  .tag{position:fixed;top:28px;right:32px;text-align:right;font-size:11.5px;line-height:1.7;color:var(--ink-soft);letter-spacing:.05em}
+  .foot{display:flex;justify-content:space-between;align-items:flex-end}
+  .spec{font-size:12px;line-height:1.9;color:var(--ink-soft);letter-spacing:.04em}
   .spec b{color:var(--ink);font-weight:500}
-  .metals{pointer-events:auto;display:flex;gap:22px}
-  .metals button{appearance:none;border:0;background:none;font:inherit;font-size:12.5px;letter-spacing:.06em;color:var(--ink-soft);cursor:pointer;padding:6px 0;border-bottom:1px solid transparent;transition:color .25s,border-color .25s}
-  .metals button:hover{color:var(--ink)}
-  .metals button.active{color:var(--ink);border-bottom-color:var(--ink)}
+  .metals{pointer-events:auto;display:flex;gap:8px}
+  .metals button{pointer-events:auto;border:1px solid var(--line);background:transparent;color:var(--ink-soft);font-size:11.5px;letter-spacing:.08em;padding:8px 14px;cursor:pointer;transition:all .25s}
+  .metals button.active{border-color:var(--ink);color:var(--ink)}
+  .metals button:hover{border-color:var(--ink)}
   .hint{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);font-size:12px;color:var(--ink-soft);letter-spacing:.04em;transition:opacity .8s;pointer-events:none}
   .hint.gone{opacity:0}
-  .tag{position:fixed;top:30px;right:30px;font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-align:right;line-height:1.6;pointer-events:none}
   @media (max-width:640px){ .frame{padding:20px} .head .piece{font-size:20px} .tag{top:20px;right:20px} .spec{font-size:11.5px} .hint{bottom:110px} }
 </style>
 </head>
@@ -31,22 +32,23 @@
 <div id="stage"></div>
 <div class="frame">
   <div class="head">
-    <div class="brand">SHEER OBJECTS</div>
-    <div class="piece">KD-116 <span>lariat earring</span></div>
+    <div>
+      <div class="brand">SHEER OBJECTS</div>
+      <div class="piece">KD-116 · Pavé Huggie</div>
+    </div>
   </div>
   <div class="foot">
     <div class="spec">
-      <b>12 mm hoop</b>, 1.7 × 1.5 mm band, 5 mm hinged post,<br>
-      seven 1.5 mm stones in scooped seats (0.21 ct the pair).<br>
-      Built to the CAD sheet dimensions.
+      <b>12.0 mm</b> outer · <b>1.7 mm</b> width · <b>1.5 mm</b> CZ × 7<br>
+      925 silver · 14k gold vermeil 2.5µ
     </div>
-    <div class="metals" role="group" aria-label="Metal finish">
-      <button id="btnGold" class="active">14k gold vermeil</button>
-      <button id="btnSilver">Sterling silver</button>
+    <div class="metals">
+      <button id="btnGold" class="active">Gold</button>
+      <button id="btnSilver">Silver</button>
     </div>
   </div>
 </div>
-<div class="tag">Three.js r186 build<br>studio HDRI · mirror-pavilion stones</div>
+<div class="tag">Three.js r186 build<br>synthetic studio light · mirror-pavilion stones</div>
 <div class="hint" id="hint">Drag to rotate. Scroll or pinch to zoom.</div>
 <script type="module" src="/src/main.js"></script>
 </body>

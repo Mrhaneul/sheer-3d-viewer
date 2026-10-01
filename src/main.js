@@ -259,14 +259,17 @@ for (const a of stoneAngles) {
 // sit beside the two of the next → the paired-nub clusters in the reference. Spheres rejected: prongs
 // are wedges, not beads.
 const PRONG_OFF = THREE.MathUtils.degToRad(8.0);   // stone girdle half-angle ≈7.3°, so tips overlap the girdle edge
-const PRONG_LEAN = 0.16;                            // lean each prong toward the stone it holds
-const prongGeo = new THREE.CylinderGeometry(0.055, 0.125, 0.55, 10);   // tapered claw, tip 6.10 (girdle 5.92 / table 6.13), base sunk in the band
+const PRONG_LEAN = 0.10;                            // slight lean toward the stone (0.16 read as antennae)
+const prongGeo = new THREE.CylinderGeometry(0.10, 0.155, 0.32, 12);    // chunky short claw (0.055/0.55 pins rejected 2026-10-01: read as needles)
+const prongTipGeo = new THREE.SphereGeometry(0.10, 12, 10);            // rounded tip → nub, not flat-cut pin
 for (const a of stoneAngles) {
   [-1, 1].forEach(side => {
     const pa = a + side * PRONG_OFF, dir = radial(pa);
     [-0.40, 0.40].forEach(z => {
-      const pr = new THREE.Mesh(prongGeo, bandMat);
-      pr.position.copy(dir).multiplyScalar(R_OUT - 0.18); pr.position.z = z;
+      const pr = new THREE.Group();
+      const shaft = new THREE.Mesh(prongGeo, bandMat); pr.add(shaft);
+      const tip = new THREE.Mesh(prongTipGeo, bandMat); tip.position.y = 0.16; pr.add(tip);
+      pr.position.copy(dir).multiplyScalar(R_OUT - 0.10); pr.position.z = z;   // span ≈5.74–6.06: tip over the girdle (5.92), base in the band
       pr.quaternion.setFromUnitVectors(up, dir);
       pr.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -side * PRONG_LEAN);   // tip toward the stone
       jewel.add(pr);
