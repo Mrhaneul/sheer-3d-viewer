@@ -226,8 +226,10 @@ for (const a of stoneAngles) {
 // between stones (a single cusp beyond each end stone) and dips in a rounded U under each stone, with fillet
 // blends at every junction, so teeth and bridges read as one body (separate teeth + rails showed seams).
 for (const g of settingWalls(stoneAngles, PITCH, {
-  R_REF: R_OUT - 0.10, U_MID: R_OUT - 0.19, U_END: R_OUT, CUSP_PEAK: R_OUT + 0.09, CUSP_W: 0.17, CUSP_DROP: 0.20, CUSP_POW: 4,
-  CUSP_T: 0.25, END_OFF: 0.84, R_BOT: R_OUT - 0.60, Z: 0.58, THICK: 0.30, BEVEL: 0.045, LEAN: 0.22, BLEND: 0.05, N: 900,
+  R_REF: R_OUT - 0.10, U_MID: R_OUT - 0.19, U_END: R_OUT, CUSP_PEAK: R_OUT + 0.09, CUSP_W: 0.18, CUSP_DROP: 0.20, CUSP_POW: 3,
+  CUSP_T: 0.25, END_OFF: 0.84, R_BOT: R_OUT - 0.60, Z: 0.58, THICK: 0.30, LEAN: 0.22, N: 900,
+  BEVEL: 0.10, BEVEL_SIZE: 0.05, BEVEL_SEGS: 8,   // deeper rounded bevel → pillowy cross-section (was 0.045 / 5 segs, read as slab)
+  BLEND: 0.09, CREASE_DEG: 70,                    // softer tooth-to-U fillets; smooth shading (flat facets read as ridges)
 })) jewel.add(new THREE.Mesh(g, bandMat));
 
 jewel.rotation.set(0, 0, 0);

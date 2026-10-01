@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 
 // KD-116 band as ONE continuous sweep of a rounded profile (no flat extruded slab), with a round cup
 // pressed into the top for each stone and 4 diagonal claw prongs per stone (annotated refs 2026-10-01).
@@ -224,8 +225,8 @@ export function settingWalls(stoneAngles, pitch, p) {
   const out = [];
   for (const side of [-1, 1]) {
     const g = new THREE.ExtrudeGeometry(new THREE.Shape(pts), {
-      depth: p.THICK - 2 * p.BEVEL, bevelEnabled: true, bevelThickness: p.BEVEL, bevelSize: p.BEVEL,
-      bevelOffset: -p.BEVEL, bevelSegments: 5, curveSegments: 4, steps: 1,
+      depth: p.THICK - 2 * p.BEVEL, bevelEnabled: true, bevelThickness: p.BEVEL, bevelSize: p.BEVEL_SIZE ?? p.BEVEL,
+      bevelOffset: -(p.BEVEL_SIZE ?? p.BEVEL), bevelSegments: p.BEVEL_SEGS ?? 5, curveSegments: 4, steps: 1,
     });
     g.translate(0, 0, side * p.Z - (p.THICK - 2 * p.BEVEL) / 2);
     const pos = g.attributes.position;                   // shear: lean the top edge inward over the stones
@@ -233,8 +234,9 @@ export function settingWalls(stoneAngles, pitch, p) {
       const r = Math.hypot(pos.getX(i), pos.getY(i)), h = Math.max(0, r - (p.R_BOT + 0.3));
       pos.setZ(i, pos.getZ(i) - side * p.LEAN * h);
     }
-    g.computeVertexNormals();
-    out.push(g);
+    // smooth shading across the whole wall (ExtrudeGeometry is flat-shaded per facet, which read as ridges);
+    // only edges sharper than CREASE_DEG stay crisp
+    out.push(toCreasedNormals(g, THREE.MathUtils.degToRad(p.CREASE_DEG ?? 70)));
   }
   return out;
 }
