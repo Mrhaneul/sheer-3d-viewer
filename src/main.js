@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshTransmissionMaterialImpl } from './MeshTransmissionMaterialImpl.js';
-import { buildBand, molarGeometry, endToothGeometry, settingLayout, railGeometries } from './band.js';
+import { buildBand, settingWalls } from './band.js';
 
 const stage = document.getElementById('stage');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -222,16 +222,13 @@ for (const a of stoneAngles) {
   s.rotateY(a * 3.1);
   jewel.add(s);
 }
-// Setting (refs 2026-10-01): a two-cusp "molar" tooth at every gap between stones on each side of the band,
-// ONE single-cusp tooth beyond each end stone, and a rounded rail along each side joining tooth to tooth in a
-// U that dips under and cradles each stone. All geometry in band.js; previewed headlessly before shipping.
-const MOLAR = molarGeometry({ HALF_W: 0.42, H_SIDE: 0.20, H_CUSP: 0.36, H_NOTCH: 0.25, CUSP_T: 0.27, THICK: 0.30, BEVEL: 0.06 });
-const END_TOOTH = endToothGeometry({ HALF_W: 0.20, H_SIDE: 0.22, H_TOP: 0.36, THICK: 0.30, BEVEL: 0.06 });
-const LAYOUT = settingLayout(stoneAngles, PITCH, { BASE_R: R_OUT - 0.28, Z: 0.58, LEAN: 0.22, END_OFF: 0.84, R_TOOTH: R_OUT - 0.10 });
-for (const M of LAYOUT.molars) { const t = new THREE.Mesh(MOLAR, bandMat); t.applyMatrix4(M); jewel.add(t); }
-for (const M of LAYOUT.ends) { const t = new THREE.Mesh(END_TOOTH, bandMat); t.applyMatrix4(M); jewel.add(t); }
-for (const g of railGeometries(stoneAngles, PITCH, { Z: 0.64, R_END: R_OUT - 0.01, R_MID: R_OUT - 0.19, TUBE: 0.10, INSET_MM: 0.25, R_REF: R_OUT - 0.10 }))
-  jewel.add(new THREE.Mesh(g, bandMat));
+// Setting (refs 2026-10-01): ONE continuous wall per band side. Its top edge rises into two-cusp "molar" teeth
+// between stones (a single cusp beyond each end stone) and dips in a rounded U under each stone, with fillet
+// blends at every junction, so teeth and bridges read as one body (separate teeth + rails showed seams).
+for (const g of settingWalls(stoneAngles, PITCH, {
+  R_REF: R_OUT - 0.10, U_MID: R_OUT - 0.19, U_END: R_OUT, CUSP_PEAK: R_OUT + 0.09, CUSP_W: 0.17, CUSP_DROP: 0.20, CUSP_POW: 4,
+  CUSP_T: 0.25, END_OFF: 0.84, R_BOT: R_OUT - 0.60, Z: 0.58, THICK: 0.30, BEVEL: 0.045, LEAN: 0.22, BLEND: 0.05, N: 900,
+})) jewel.add(new THREE.Mesh(g, bandMat));
 
 jewel.rotation.set(0, 0, 0);
 scene.add(jewel);

@@ -188,3 +188,53 @@ export function railGeometries(stoneAngles, pitch, r) {
   }
   return out;
 }
+
+// ONE-PIECE setting wall per band side (2026-10-01): replaces separate molar teeth + U rails, whose overlaps
+// showed seams. A single outline in the hoop plane: the top edge dips in a U under each stone and rises into
+// two-cusp teeth between stones (single cusp at each end), blended with a smooth max so every junction is a
+// fillet; then extruded once across a thin axial thickness, rounded by a bevel, and sheared to lean inward.
+export function settingWalls(stoneAngles, pitch, p) {
+  // p: { R_REF, U_MID, U_END, CUSP_PEAK, CUSP_W, CUSP_DROP, CUSP_POW, CUSP_T, END_OFF, R_BOT, Z, THICK, BEVEL, LEAN, BLEND, N }
+  const smax = (a, b, k) => 0.5 * (a + b + Math.sqrt((a - b) * (a - b) + k * k));
+  const half = pitch / 2;
+  const cusps = [];   // tangential cusp centres, in angle
+  for (let i = 1; i < stoneAngles.length; i++) {
+    const g = stoneAngles[0] + pitch * (i - 0.5), dc = p.CUSP_T / p.R_REF;
+    cusps.push(g - dc, g + dc);
+  }
+  const e0 = stoneAngles[0] - p.END_OFF / p.R_REF, e1 = stoneAngles[stoneAngles.length - 1] + p.END_OFF / p.R_REF;
+  cusps.push(e0, e1);
+  const top = th => {
+    let r = p.R_BOT;
+    for (const a of stoneAngles) {                       // U cradle under each stone
+      const f = (th - a) / half;
+      if (Math.abs(f) <= 1.25) r = Math.max(r, p.U_MID + (p.U_END - p.U_MID) * f * f);
+    }
+    r = Math.min(r, p.U_END);
+    for (const c of cusps) {                             // rounded cusps, fillet-blended into the U
+      const t = (th - c) * p.R_REF / p.CUSP_W;
+      r = smax(r, p.CUSP_PEAK - p.CUSP_DROP * Math.pow(Math.abs(t), p.CUSP_POW || 2), p.BLEND);   // POW 4 = flat-topped rounded block
+    }
+    return r;
+  };
+  const ws = p.CUSP_W * 0.9 / p.R_REF, th0 = e0 - ws, th1 = e1 + ws;
+  const pts = [];
+  for (let k = 0; k <= p.N; k++) { const th = th0 + (th1 - th0) * k / p.N, r = top(th); pts.push(new THREE.Vector2(r * Math.cos(th), r * Math.sin(th))); }
+  for (let k = 40; k >= 0; k--) { const th = th0 + (th1 - th0) * k / 40; pts.push(new THREE.Vector2(p.R_BOT * Math.cos(th), p.R_BOT * Math.sin(th))); }
+  const out = [];
+  for (const side of [-1, 1]) {
+    const g = new THREE.ExtrudeGeometry(new THREE.Shape(pts), {
+      depth: p.THICK - 2 * p.BEVEL, bevelEnabled: true, bevelThickness: p.BEVEL, bevelSize: p.BEVEL,
+      bevelOffset: -p.BEVEL, bevelSegments: 5, curveSegments: 4, steps: 1,
+    });
+    g.translate(0, 0, side * p.Z - (p.THICK - 2 * p.BEVEL) / 2);
+    const pos = g.attributes.position;                   // shear: lean the top edge inward over the stones
+    for (let i = 0; i < pos.count; i++) {
+      const r = Math.hypot(pos.getX(i), pos.getY(i)), h = Math.max(0, r - (p.R_BOT + 0.3));
+      pos.setZ(i, pos.getZ(i) - side * p.LEAN * h);
+    }
+    g.computeVertexNormals();
+    out.push(g);
+  }
+  return out;
+}
