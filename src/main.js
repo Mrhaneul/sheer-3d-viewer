@@ -224,7 +224,7 @@ for (const a of stoneAngles) {
 }
 // Per-stone 4-prong holders (annotated refs 2026-10-01): one claw on each DIAGONAL of every stone, base on
 // the cup rim, rounded tip leaning over the crown edge; neighbouring stones' claws pair up in each gap.
-const PRONG_TIP_R = 0.09, PRONG_BASE_R = 0.13;
+const PRONG_TIP_R = 0.16, PRONG_BASE_R = 0.22;   // wide claws per Joyce/Haneul 2026-10-01 (was 0.09 / 0.13)
 const prongTipGeo = new THREE.SphereGeometry(PRONG_TIP_R, 14, 10);
 for (const { base, tip } of prongSegments(stoneAngles, { BASE_R: R_OUT - 0.16, BASE_OFF: 0.86, TIP_R: R_OUT + 0.07, TIP_OFF: 0.70 })) {
   const axis = tip.clone().sub(base), len = axis.length();
