@@ -78,7 +78,7 @@ export function buildBand(c) {
     for (let i = 0; i < N; i++) for (let k = 0; k < 3; k++) cx[k] += pos[(j * N + i) * 3 + k] / N;
     for (let i = 0; i < N; i++) {
       const p0 = pos.slice((j * N + i) * 3, (j * N + i) * 3 + 3), p1 = pos.slice((j * N + (i + 1) % N) * 3, (j * N + (i + 1) % N) * 3 + 3);
-      if (dir > 0) caps.push(...cx, ...p0, ...p1); else caps.push(...cx, ...p1, ...p0);
+      if (dir > 0) caps.push(...cx, ...p1, ...p0); else caps.push(...cx, ...p0, ...p1);   // wound to face OUT (were inward → culled → open ends)
     }
   });
   const capG = new THREE.BufferGeometry();

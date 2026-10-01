@@ -83,7 +83,6 @@ const METALS = {
 const bandMat = new THREE.MeshPhysicalMaterial({
   color: METALS.gold.color, metalness: 1.0, roughness: METALS.gold.roughness, envMapIntensity: 1.5,
 });
-const slotMat = new THREE.MeshStandardMaterial({ color: 0x2b2416, metalness: 0.8, roughness: 0.5 });
 
 // Default stone material: physically based transmission (runs everywhere)
 const stonePhysMat = new THREE.MeshPhysicalMaterial({
@@ -164,8 +163,8 @@ postGeo.rotateZ(a0 - 0.06);                                   // slight overlap 
 const post = new THREE.Mesh(postGeo, bandMat); jewel.add(post);
 const postCap = new THREE.Mesh(new THREE.SphereGeometry(POST_TUBE, 20, 14), bandMat);
 postCap.position.set(POST_R * Math.cos(a1 + 0.02), POST_R * Math.sin(a1 + 0.02), 0); jewel.add(postCap);
-const slot = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.9), slotMat);
-slot.position.set(POST_R * Math.cos(a0 + 0.03), POST_R * Math.sin(a0 + 0.03), 0); jewel.add(slot);
+// (2026-10-01) placeholder clasp-slot box removed: unaligned dark block floating outside the band end; the post now
+// meets a closed end cap. Real clasp geometry comes with the Karma CAD.
 
 // ---------- Round brilliant cut: 57 facets, 8-fold symmetry ----------
 function brilliantGeometry(r) {
