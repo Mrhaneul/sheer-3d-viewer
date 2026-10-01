@@ -139,7 +139,7 @@ const S_A0 = THREE.MathUtils.degToRad(129);
 const SEAM = S_A0 + PITCH * (STONES - 1) + THREE.MathUtils.degToRad(11);
 const CUT_R = 1.69;                       // scoop radius; with CUT_C below gives a SHALLOW continuous scallop (0.35mm dip), per Mejuri refs 2026-09-28 v2
 const CUT_C = R_OUT + 1.34;               // paired with CUT_R 1.69: adjacent scoops meet in cusps at R_OUT, valley at 5.65
-const STONE_C = R_OUT - 0.22;             // flush-to-proud: table ≈6.0 level with cusp tops, girdle bulges into the scoop (refs show stones NOT recessed; -0.50 recessed pass rejected)
+const STONE_C = R_OUT - 0.10;             // proud: table 6.13, girdle 5.92 overhangs the scoop walls (hides the flat tray sides; per annotated refs 2026-10-01)
 const stoneAngles = []; for (let i = 0; i < STONES; i++) stoneAngles.push(S_A0 + PITCH * i);
 
 // ---------- Pavé section: scalloped side profile extruded across the width ----------
@@ -254,20 +254,24 @@ for (const a of stoneAngles) {
   s.rotateY(a * 3.1);
   jewel.add(s);
 }
-// Prong claw beads at the cusps between stones — these are the claws gripping adjacent girdles in the
-// Mejuri references (2026-09-28 v2). Re-enabled after the earlier removal: with wide flats they read as
-// stray dots; on the continuous shallow scallop with proud stones they read as prongs.
-const SHOW_BEADS = true;
-if (SHOW_BEADS) {
-  const beadGeo = new THREE.SphereGeometry(0.13, 16, 12);
-  for (let i = 0; i <= STONES; i++) {
-    const a = S_A0 + PITCH * (i - 0.5), dir = radial(a);
-    [-0.45, 0.45].forEach(z => {
-      const p = new THREE.Mesh(beadGeo, bandMat);
-      p.position.copy(dir).multiplyScalar(R_OUT - 0.06); p.position.z = z;   // half-sunk into the cusp, tips just proud, hugging the stone rims
-      jewel.add(p);
+// Per-stone 4-prong holders (annotated refs 2026-10-01): each stone gets four tapered claw prongs,
+// two toward each neighbour, tips leaning over the girdle. At every gap the two prongs of one stone
+// sit beside the two of the next → the paired-nub clusters in the reference. Spheres rejected: prongs
+// are wedges, not beads.
+const PRONG_OFF = THREE.MathUtils.degToRad(8.0);   // stone girdle half-angle ≈7.3°, so tips overlap the girdle edge
+const PRONG_LEAN = 0.16;                            // lean each prong toward the stone it holds
+const prongGeo = new THREE.CylinderGeometry(0.055, 0.125, 0.55, 10);   // tapered claw, tip 6.10 (girdle 5.92 / table 6.13), base sunk in the band
+for (const a of stoneAngles) {
+  [-1, 1].forEach(side => {
+    const pa = a + side * PRONG_OFF, dir = radial(pa);
+    [-0.40, 0.40].forEach(z => {
+      const pr = new THREE.Mesh(prongGeo, bandMat);
+      pr.position.copy(dir).multiplyScalar(R_OUT - 0.18); pr.position.z = z;
+      pr.quaternion.setFromUnitVectors(up, dir);
+      pr.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -side * PRONG_LEAN);   // tip toward the stone
+      jewel.add(pr);
     });
-  }
+  });
 }
 
 jewel.rotation.set(0, 0, 0);
