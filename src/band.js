@@ -133,3 +133,58 @@ export function molarMatrices(stoneAngles, pitch, p) {
   }
   return out;
 }
+
+// End teeth (ref 2026-10-01): beyond the first and last stone there is ONE single-cusp tooth per side,
+// hugging that stone, instead of a two-cusp molar.
+export function endToothGeometry(m) {
+  // m: { HALF_W, H_SIDE, H_TOP, THICK, BEVEL }
+  const s = new THREE.Shape(), W = m.HALF_W, b = m.BEVEL;
+  s.moveTo(-W, 0); s.lineTo(W, 0); s.lineTo(W, m.H_SIDE);
+  s.quadraticCurveTo(W, m.H_TOP, 0, m.H_TOP);       // single rounded crown
+  s.quadraticCurveTo(-W, m.H_TOP, -W, m.H_SIDE);
+  s.lineTo(-W, 0);
+  const g = new THREE.ExtrudeGeometry(s, {
+    depth: m.THICK - 2 * b, bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelOffset: -b,
+    bevelSegments: 4, curveSegments: 14, steps: 1,
+  });
+  g.translate(0, 0, -(m.THICK - 2 * b) / 2);
+  g.computeVertexNormals();
+  return g;
+}
+
+function toothMatrix(ang, side, p) {
+  const er = new THREE.Vector3(Math.cos(ang), Math.sin(ang), 0), et = new THREE.Vector3(-Math.sin(ang), Math.cos(ang), 0), ez = new THREE.Vector3(0, 0, 1);
+  const basis = new THREE.Matrix4().makeBasis(et, er, ez);
+  const lean = new THREE.Matrix4().makeRotationX(-side * p.LEAN);
+  const pos = er.clone().multiplyScalar(p.BASE_R).add(ez.clone().multiplyScalar(side * p.Z));
+  return new THREE.Matrix4().makeTranslation(pos.x, pos.y, pos.z).multiply(basis).multiply(lean);
+}
+
+// Full setting layout: molars at the interior gaps only, single end teeth just outside the end stones.
+export function settingLayout(stoneAngles, pitch, p) {
+  // p: { BASE_R, Z, LEAN, END_OFF (tangential mm from end-stone centre to end tooth), R_TOOTH (radius used for mm→rad) }
+  const molars = [], ends = [];
+  for (let i = 1; i < stoneAngles.length; i++) {
+    const g = stoneAngles[0] + pitch * (i - 0.5);
+    for (const side of [-1, 1]) molars.push(toothMatrix(g, side, p));
+  }
+  const dEnd = p.END_OFF / p.R_TOOTH;
+  for (const ang of [stoneAngles[0] - dEnd, stoneAngles[stoneAngles.length - 1] + dEnd])
+    for (const side of [-1, 1]) ends.push(toothMatrix(ang, side, p));
+  return { molars, ends };
+}
+
+// Rounded rails along each side joining tooth to tooth: a U that dips under each stone and cradles it.
+export function railGeometries(stoneAngles, pitch, r) {
+  // r: { Z, R_END, R_MID, TUBE, INSET_MM, R_REF }
+  const out = [], h = pitch / 2 - r.INSET_MM / r.R_REF;
+  for (const a of stoneAngles) for (const side of [-1, 1]) {
+    const pts = [];
+    for (let k = -4; k <= 4; k++) {
+      const f = k / 4, th = a + f * h, rad = r.R_MID + (r.R_END - r.R_MID) * f * f;
+      pts.push(new THREE.Vector3(rad * Math.cos(th), rad * Math.sin(th), side * r.Z));
+    }
+    out.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 40, r.TUBE, 12, false));
+  }
+  return out;
+}
