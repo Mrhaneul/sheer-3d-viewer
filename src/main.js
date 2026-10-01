@@ -3,6 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshTransmissionMaterialImpl } from './MeshTransmissionMaterialImpl.js';
+import { buildBand, prongSegments } from './band.js';
 
 const stage = document.getElementById('stage');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -136,53 +137,20 @@ const A_END = Math.PI / 2 - OPEN_HALF + Math.PI * 2;     // clasp end ≈ 62° +
 const STONES = 7;
 const PITCH = THREE.MathUtils.degToRad(17.8);
 const S_A0 = THREE.MathUtils.degToRad(129);
-const SEAM = S_A0 + PITCH * (STONES - 1) + THREE.MathUtils.degToRad(11);
-const CUT_R = 1.69;                       // scoop radius; with CUT_C below gives a SHALLOW continuous scallop (0.35mm dip), per Mejuri refs 2026-09-28 v2
-const CUT_C = R_OUT + 1.34;               // paired with CUT_R 1.69: adjacent scoops meet in cusps at R_OUT, valley at 5.65
-const STONE_C = R_OUT - 0.10;             // proud: table 6.13, girdle 5.92 overhangs the scoop walls (hides the flat tray sides; per annotated refs 2026-10-01)
+const STONE_C = R_OUT - 0.10;             // proud: table ≈6.15 above the band top (6.0), girdle sits in the round cup seat (band.js)
 const stoneAngles = []; for (let i = 0; i < STONES; i++) stoneAngles.push(S_A0 + PITCH * i);
 
-// ---------- Pavé section: scalloped side profile extruded across the width ----------
-function outerRadiusAt(theta) {
-  let r = R_OUT;
-  for (const a of stoneAngles) {
-    const cu = CUT_C * Math.cos(theta - a);
-    const disc = cu * cu - (CUT_C * CUT_C - CUT_R * CUT_R);
-    if (disc > 0) { const rin = cu - Math.sqrt(disc); if (rin > 0 && rin < r) r = rin; }
-  }
-  return r;
-}
-const pts = [];
-const STEP = THREE.MathUtils.degToRad(0.35);
-for (let t = A_START; t <= SEAM + 1e-9; t += STEP) { const rr = outerRadiusAt(t); pts.push(new THREE.Vector2(rr * Math.cos(t), rr * Math.sin(t))); }
-for (let t = SEAM; t >= A_START - 1e-9; t -= STEP * 3) pts.push(new THREE.Vector2(R_IN * Math.cos(t), R_IN * Math.sin(t)));
-const BEV = 0.14;   // rounder band edges per Joyce 2026-09-28; must stay well below the scoop radius (1.07) or the offset outline pinches into fins
-const paveGeo = new THREE.ExtrudeGeometry(new THREE.Shape(pts), {
-  depth: WIDTH - 2 * BEV, bevelEnabled: true, bevelThickness: BEV, bevelSize: BEV, bevelOffset: -BEV, bevelSegments: 6, steps: 1,
+// ---------- Band: ONE continuous sweep of a rounded profile + a round cup seat per stone ----------
+// (2026-10-01) Replaces the old extruded pave slab (rectangular cross-section, cylinder-cut troughs,
+// flat sides and rails) and the separate plain sweep. Geometry lives in band.js and was checked with a
+// headless render of this exact code before shipping.
+const BAND = buildBand({
+  R_MID, THICK, WIDTH, CORNER: 0.55, A_START, A_END, stoneAngles, PITCH,
+  SEAT_R: 0.79, SEAT_C: R_OUT - 0.04,          // cup radius / centre: rim circle ≈0.79 at the band top, holds the 1.5 mm girdle with ~0.04 clearance
+  PROFILE_N: 104, DENSE_STEP: THREE.MathUtils.degToRad(0.3), COARSE_STEP: THREE.MathUtils.degToRad(1.0),
 });
-paveGeo.translate(0, 0, -(WIDTH - 2 * BEV) / 2);
-const paveSmooth = toCreasedNormals(paveGeo, THREE.MathUtils.degToRad(32));
-
-// ---------- Plain section: rounded comfort profile swept along the remaining arc ----------
-class ArcCurve extends THREE.Curve {
-  constructor(r, a0, a1) { super(); this.r = r; this.a0 = a0; this.a1 = a1; }
-  getPoint(t, target = new THREE.Vector3()) { const a = this.a0 + (this.a1 - this.a0) * t; return target.set(this.r * Math.cos(a), this.r * Math.sin(a), 0); }
-}
-function roundedRectShape(w, h, r) {
-  const s = new THREE.Shape(), x = -w / 2, y = -h / 2;
-  s.moveTo(x + r, y); s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
-  s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
-  s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
-  return s;
-}
-const plainGeo = new THREE.ExtrudeGeometry(roundedRectShape(THICK, WIDTH, 0.60), {
-  steps: 260, bevelEnabled: false, curveSegments: 8, extrudePath: new ArcCurve(R_MID, SEAM, A_END),
-});
-const plainSmooth = toCreasedNormals(plainGeo, THREE.MathUtils.degToRad(32));
-
 const jewel = new THREE.Group();
-jewel.add(new THREE.Mesh(paveSmooth, bandMat), new THREE.Mesh(plainSmooth, bandMat));
+jewel.add(new THREE.Mesh(BAND.band, bandMat), new THREE.Mesh(BAND.caps, bandMat));
 
 // ---------- Post and clasp slot ----------
 // NOTE: the CAD sheet shows a straight 5.0 mm post; the curved wire below follows the reference product photo. Confirm with Karma.
@@ -254,27 +222,17 @@ for (const a of stoneAngles) {
   s.rotateY(a * 3.1);
   jewel.add(s);
 }
-// Per-stone 4-prong holders (annotated refs 2026-10-01): each stone gets four tapered claw prongs,
-// two toward each neighbour, tips leaning over the girdle. At every gap the two prongs of one stone
-// sit beside the two of the next → the paired-nub clusters in the reference. Spheres rejected: prongs
-// are wedges, not beads.
-const PRONG_OFF = THREE.MathUtils.degToRad(8.0);   // stone girdle half-angle ≈7.3°, so tips overlap the girdle edge
-const PRONG_LEAN = 0.10;                            // slight lean toward the stone (0.16 read as antennae)
-const prongGeo = new THREE.CylinderGeometry(0.10, 0.155, 0.32, 12);    // chunky short claw (0.055/0.55 pins rejected 2026-10-01: read as needles)
-const prongTipGeo = new THREE.SphereGeometry(0.10, 12, 10);            // rounded tip → nub, not flat-cut pin
-for (const a of stoneAngles) {
-  [-1, 1].forEach(side => {
-    const pa = a + side * PRONG_OFF, dir = radial(pa);
-    [-0.40, 0.40].forEach(z => {
-      const pr = new THREE.Group();
-      const shaft = new THREE.Mesh(prongGeo, bandMat); pr.add(shaft);
-      const tip = new THREE.Mesh(prongTipGeo, bandMat); tip.position.y = 0.16; pr.add(tip);
-      pr.position.copy(dir).multiplyScalar(R_OUT - 0.10); pr.position.z = z;   // span ≈5.74–6.06: tip over the girdle (5.92), base in the band
-      pr.quaternion.setFromUnitVectors(up, dir);
-      pr.rotateOnWorldAxis(new THREE.Vector3(0, 0, 1), -side * PRONG_LEAN);   // tip toward the stone
-      jewel.add(pr);
-    });
-  });
+// Per-stone 4-prong holders (annotated refs 2026-10-01): one claw on each DIAGONAL of every stone, base on
+// the cup rim, rounded tip leaning over the crown edge; neighbouring stones' claws pair up in each gap.
+const PRONG_TIP_R = 0.09, PRONG_BASE_R = 0.13;
+const prongTipGeo = new THREE.SphereGeometry(PRONG_TIP_R, 14, 10);
+for (const { base, tip } of prongSegments(stoneAngles, { BASE_R: R_OUT - 0.16, BASE_OFF: 0.86, TIP_R: R_OUT + 0.07, TIP_OFF: 0.70 })) {
+  const axis = tip.clone().sub(base), len = axis.length();
+  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(PRONG_TIP_R, PRONG_BASE_R, len, 12), bandMat);
+  shaft.position.copy(base).addScaledVector(axis, 0.5);
+  shaft.quaternion.setFromUnitVectors(up, axis.normalize());
+  const cap = new THREE.Mesh(prongTipGeo, bandMat); cap.position.copy(tip);
+  jewel.add(shaft, cap);
 }
 
 jewel.rotation.set(0, 0, 0);
