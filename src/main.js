@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshTransmissionMaterialImpl } from './MeshTransmissionMaterialImpl.js';
-import { buildBand, settingWalls } from './band.js';
+import { buildBand, settingWalls, hallmarkGeometry } from './band.js';
 
 const stage = document.getElementById('stage');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -153,6 +153,35 @@ const BAND = buildBand({
 const jewel = new THREE.Group();
 jewel.add(new THREE.Mesh(BAND.band, bandMat), new THREE.Mesh(BAND.caps, bandMat));
 
+// ---------- Hallmark on the inside of the band (2026-10-01) ----------
+// "SO" is a placeholder for the brand mark; "925" is the sterling-silver fineness stamp. Stamped look: slightly
+// darker, matte letters on a thin strip just inside the inner face, bottom of the hoop (opposite the opening).
+const HALLMARK_TEXT = 'SO 925';
+const HALLMARK_ANGLE = THREE.MathUtils.degToRad(270);   // centre of the stamp; move here if it should sit elsewhere
+function hallmarkTexture(text) {
+  const c = document.createElement('canvas'); c.width = 1024; c.height = 256;
+  const x = c.getContext('2d');
+  x.fillStyle = '#000'; x.fillRect(0, 0, c.width, c.height);
+  x.fillStyle = '#fff'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  let size = 220;
+  const font = sz => `600 ${sz}px "Helvetica Neue", Helvetica, Arial, sans-serif`;
+  x.font = font(size);
+  while (x.measureText(text).width > 940 && size > 60) { size -= 6; x.font = font(size); }
+  x.fillText(text, c.width / 2, c.height / 2 + size * 0.04);
+  const t = new THREE.CanvasTexture(c);
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+const ENGRAVE_SHADE = 0.62;
+const engraveMat = new THREE.MeshPhysicalMaterial({
+  color: new THREE.Color(METALS.gold.color).multiplyScalar(ENGRAVE_SHADE), metalness: 1.0, roughness: 0.45,
+  envMapIntensity: 1.0, alphaMap: hallmarkTexture(HALLMARK_TEXT), transparent: true, depthWrite: false,
+  polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+});
+const hallmark = new THREE.Mesh(hallmarkGeometry({ R: R_IN - 0.003, THETA_C: HALLMARK_ANGLE, ARC_MM: 2.2, HEIGHT_MM: 0.55, NS: 60, NT: 2 }), engraveMat);
+hallmark.renderOrder = 5;
+jewel.add(hallmark);
+
 // ---------- Post and clasp slot ----------
 // NOTE: the CAD sheet shows a straight 5.0 mm post; the curved wire below follows the reference product photo. Confirm with Karma.
 // Post: round wire following the hoop's curve across the opening (as on the reference piece)
@@ -284,6 +313,7 @@ try { (console.log || function(){})('GPU:', gpuName); } catch (e) {}
 const btnGold = document.getElementById('btnGold'), btnSilver = document.getElementById('btnSilver');
 function setMetal(name) {
   const m = METALS[name]; bandMat.color.setHex(m.color); bandMat.roughness = m.roughness;
+  engraveMat.color.setHex(m.color).multiplyScalar(ENGRAVE_SHADE);   // hallmark follows the metal
   btnGold.classList.toggle('active', name === 'gold'); btnSilver.classList.toggle('active', name === 'silver');
 }
 btnGold.addEventListener('click', () => setMetal('gold'));
