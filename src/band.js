@@ -94,3 +94,42 @@ export function prongSegments(stoneAngles, p) {
   }
   return out;
 }
+
+// "Molar" holders (ref 2026-10-01): at every gap between stones, on each side of the band, ONE wide
+// flat-sided tooth with two rounded cusps on top; each cusp grips one of the two neighbouring stones.
+// Silhouette in (t = tangential, h = radial) extruded across a thin axial thickness with rounded bevels.
+export function molarGeometry(m) {
+  // m: { HALF_W, H_SIDE, H_CUSP, H_NOTCH, CUSP_T, THICK, BEVEL }
+  const s = new THREE.Shape();
+  const W = m.HALF_W, b = m.BEVEL;
+  s.moveTo(-W, 0); s.lineTo(W, 0); s.lineTo(W, m.H_SIDE);
+  s.quadraticCurveTo(W, m.H_CUSP, m.CUSP_T, m.H_CUSP);                 // right cusp crown
+  s.quadraticCurveTo(m.CUSP_T * 0.35, m.H_CUSP, 0, m.H_NOTCH);           // into the notch
+  s.quadraticCurveTo(-m.CUSP_T * 0.35, m.H_CUSP, -m.CUSP_T, m.H_CUSP);   // out of the notch
+  s.quadraticCurveTo(-W, m.H_CUSP, -W, m.H_SIDE);                        // left cusp crown
+  s.lineTo(-W, 0);
+  const g = new THREE.ExtrudeGeometry(s, {
+    depth: m.THICK - 2 * b, bevelEnabled: true, bevelThickness: b, bevelSize: b, bevelOffset: -b,
+    bevelSegments: 4, curveSegments: 14, steps: 1,
+  });
+  g.translate(0, 0, -(m.THICK - 2 * b) / 2);
+  g.computeVertexNormals();
+  return g;
+}
+
+// One matrix per tooth: at each gap (including one beyond each end stone), both band sides.
+export function molarMatrices(stoneAngles, pitch, p) {
+  // p: { BASE_R, Z, LEAN }
+  const out = [], gaps = [];
+  for (let i = 0; i <= stoneAngles.length; i++) gaps.push(stoneAngles[0] + pitch * (i - 0.5));
+  for (const g of gaps) {
+    const er = new THREE.Vector3(Math.cos(g), Math.sin(g), 0), et = new THREE.Vector3(-Math.sin(g), Math.cos(g), 0), ez = new THREE.Vector3(0, 0, 1);
+    for (const side of [-1, 1]) {
+      const basis = new THREE.Matrix4().makeBasis(et, er, ez);
+      const lean = new THREE.Matrix4().makeRotationX(-side * p.LEAN);  // tilt cusps slightly IN over the stones (toward z = 0)
+      const pos = er.clone().multiplyScalar(p.BASE_R).add(ez.clone().multiplyScalar(side * p.Z));
+      out.push(new THREE.Matrix4().makeTranslation(pos.x, pos.y, pos.z).multiply(basis).multiply(lean));
+    }
+  }
+  return out;
+}

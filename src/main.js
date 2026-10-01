@@ -3,7 +3,7 @@ import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 import { toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 import { MeshTransmissionMaterialImpl } from './MeshTransmissionMaterialImpl.js';
-import { buildBand, prongSegments } from './band.js';
+import { buildBand, molarGeometry, molarMatrices } from './band.js';
 
 const stage = document.getElementById('stage');
 const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -222,17 +222,11 @@ for (const a of stoneAngles) {
   s.rotateY(a * 3.1);
   jewel.add(s);
 }
-// Per-stone 4-prong holders (annotated refs 2026-10-01): one claw on each DIAGONAL of every stone, base on
-// the cup rim, rounded tip leaning over the crown edge; neighbouring stones' claws pair up in each gap.
-const PRONG_TIP_R = 0.16, PRONG_BASE_R = 0.22;   // wide claws per Joyce/Haneul 2026-10-01 (was 0.09 / 0.13)
-const prongTipGeo = new THREE.SphereGeometry(PRONG_TIP_R, 14, 10);
-for (const { base, tip } of prongSegments(stoneAngles, { BASE_R: R_OUT - 0.16, BASE_OFF: 0.86, TIP_R: R_OUT + 0.07, TIP_OFF: 0.70 })) {
-  const axis = tip.clone().sub(base), len = axis.length();
-  const shaft = new THREE.Mesh(new THREE.CylinderGeometry(PRONG_TIP_R, PRONG_BASE_R, len, 12), bandMat);
-  shaft.position.copy(base).addScaledVector(axis, 0.5);
-  shaft.quaternion.setFromUnitVectors(up, axis.normalize());
-  const cap = new THREE.Mesh(prongTipGeo, bandMat); cap.position.copy(tip);
-  jewel.add(shaft, cap);
+// "Molar" holders (ref 2026-10-01): one wide two-cusp tooth at every gap, on each side of the band; each cusp
+// grips one neighbouring stone. Replaces the round claw pins (read as pins, not the reference's molar teeth).
+const MOLAR = molarGeometry({ HALF_W: 0.42, H_SIDE: 0.20, H_CUSP: 0.36, H_NOTCH: 0.25, CUSP_T: 0.27, THICK: 0.30, BEVEL: 0.06 });
+for (const M of molarMatrices(stoneAngles, PITCH, { BASE_R: R_OUT - 0.28, Z: 0.58, LEAN: 0.22 })) {
+  const tooth = new THREE.Mesh(MOLAR, bandMat); tooth.applyMatrix4(M); jewel.add(tooth);
 }
 
 jewel.rotation.set(0, 0, 0);
