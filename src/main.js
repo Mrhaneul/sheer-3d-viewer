@@ -146,8 +146,10 @@ const stoneAngles = []; for (let i = 0; i < STONES; i++) stoneAngles.push(S_A0 +
 // headless render of this exact code before shipping.
 const BAND = buildBand({
   R_MID, THICK, WIDTH, CORNER: 0.55, A_START, A_END, stoneAngles, PITCH,
-  SEAT_R: 0.79, SEAT_C: R_OUT - 0.04,          // cup radius / centre: rim circle ≈0.79 at the band top, holds the 1.5 mm girdle with ~0.04 clearance
-  PROFILE_N: 104, DENSE_STEP: THREE.MathUtils.degToRad(0.3), COARSE_STEP: THREE.MathUtils.degToRad(1.0),
+  // round seat as a power bowl with a rounded lip (2026-10-01): a sphere's vertical rim wall could only be drawn
+  // as a staircase; this keeps the 1.5 mm stone fully seated (checked) with a smooth rim
+  SEAT_R: 0.86, SEAT_POW: 3, SEAT_BOT: R_OUT - 0.90, SEAT_TOP: R_OUT + 0.05, SEAT_LIP: 0.08,
+  PROFILE_N: 120, DENSE_STEP: THREE.MathUtils.degToRad(0.25), COARSE_STEP: THREE.MathUtils.degToRad(1.0),
 });
 const jewel = new THREE.Group();
 jewel.add(new THREE.Mesh(BAND.band, bandMat), new THREE.Mesh(BAND.caps, bandMat));
@@ -229,7 +231,7 @@ for (const g of settingWalls(stoneAngles, PITCH, {
   R_REF: R_OUT - 0.10, U_MID: R_OUT - 0.19, U_END: R_OUT, CUSP_PEAK: R_OUT + 0.09, CUSP_W: 0.18, CUSP_DROP: 0.20, CUSP_POW: 3,
   CUSP_T: 0.25, END_OFF: 0.84, R_BOT: R_OUT - 0.60, Z: 0.58, THICK: 0.30, LEAN: 0.22, N: 900,
   BEVEL: 0.10, BEVEL_SIZE: 0.05, BEVEL_SEGS: 8,   // deeper rounded bevel → pillowy cross-section (was 0.045 / 5 segs, read as slab)
-  BLEND: 0.09, CREASE_DEG: 70,                    // softer tooth-to-U fillets; smooth shading (flat facets read as ridges)
+  BLEND: 0.09, CREASE_DEG: 70, U_SOFT: 0.06,      // softer tooth-to-U fillets; smooth shading; U curve with no kinks
 })) jewel.add(new THREE.Mesh(g, bandMat));
 
 jewel.rotation.set(0, 0, 0);

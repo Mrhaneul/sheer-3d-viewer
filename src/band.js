@@ -47,8 +47,16 @@ export function buildBand(c) {
         const perp = P.x * ea[1] - P.y * ea[0];
         const w2 = perp * perp + P.z * P.z;
         if (w2 >= c.SEAT_R * c.SEAT_R) continue;
-        const sFloor = c.SEAT_C - Math.sqrt(c.SEAT_R * c.SEAT_R - w2);
-        if (s > sFloor) { P.x += (sFloor - s) * ea[0]; P.y += (sFloor - s) * ea[1]; }
+        if (c.SEAT_POW) {
+          // power bowl (2026-10-01): finite wall slope at the rim instead of a sphere's vertical cliff (which the
+          // mesh could only draw as a staircase), plus a smooth-min blend so the rim is a rounded lip
+          const fl = c.SEAT_BOT + (c.SEAT_TOP - c.SEAT_BOT) * Math.pow(Math.sqrt(w2) / c.SEAT_R, c.SEAT_POW);
+          const k = c.SEAT_LIP, sn = 0.5 * (s + fl - Math.sqrt((s - fl) * (s - fl) + k * k));
+          if (sn < s) { P.x += (sn - s) * ea[0]; P.y += (sn - s) * ea[1]; }
+        } else {
+          const sFloor = c.SEAT_C - Math.sqrt(c.SEAT_R * c.SEAT_R - w2);
+          if (s > sFloor) { P.x += (sFloor - s) * ea[0]; P.y += (sFloor - s) * ea[1]; }
+        }
       }
       pos.set([P.x, P.y, P.z], (j * N + i) * 3);
     }
@@ -206,12 +214,11 @@ export function settingWalls(stoneAngles, pitch, p) {
   const e0 = stoneAngles[0] - p.END_OFF / p.R_REF, e1 = stoneAngles[stoneAngles.length - 1] + p.END_OFF / p.R_REF;
   cusps.push(e0, e1);
   const top = th => {
-    let r = p.R_BOT;
-    for (const a of stoneAngles) {                       // U cradle under each stone
-      const f = (th - a) / half;
-      if (Math.abs(f) <= 1.25) r = Math.max(r, p.U_MID + (p.U_END - p.U_MID) * f * f);
-    }
-    r = Math.min(r, p.U_END);
+    // U cradle under the nearest stone, smoothly capped at U_END (hard max/min left kinks in the curve)
+    let best = Infinity;
+    for (const a of stoneAngles) best = Math.min(best, Math.abs(th - a));
+    const f = best / half, u = p.U_MID + (p.U_END - p.U_MID) * f * f, kU = p.U_SOFT ?? 0.06;
+    let r = 0.5 * (u + p.U_END - Math.sqrt((u - p.U_END) * (u - p.U_END) + kU * kU));
     for (const c of cusps) {                             // rounded cusps, fillet-blended into the U
       const t = (th - c) * p.R_REF / p.CUSP_W;
       r = smax(r, p.CUSP_PEAK - p.CUSP_DROP * Math.pow(Math.abs(t), p.CUSP_POW || 2), p.BLEND);   // POW 4 = flat-topped rounded block
