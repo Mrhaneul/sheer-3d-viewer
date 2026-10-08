@@ -8,11 +8,14 @@ Live: https://mrhaneul.github.io/sheer-3d-viewer/ (pick any product from the men
 | KD-116 · Pavé huggie earring | `/` (site root) | `index.html`, `src/` |
 | KD-121 · Diamond line necklace | `/kd121/` | `products/kd121/` |
 | KD-122 · Lariat necklace | `/kd122/` | `products/kd122/` |
+| KD-136 · Organic disc pendant | `/kd136/` | `products/kd136/` |
 | KD-137 · Domed huggie earring | `/kd137/` | `products/kd137/` |
 
 ## Build
 `npm run build` builds KD-116 to `dist/` and each product to `dist/<id>/` (Vite, single-file pages, Three.js r186).
 Pushing to `main` builds and deploys to GitHub Pages (`.github/workflows/deploy.yml`, which runs `npm run build`).
+KD-136's disc triangulation is generated during the build (`products/kd136/gen_topology.mjs`, cdt2d, ~2.5 s) into
+`products/kd136/src/disc_topology.json`; it is not committed. Its outline is traced from the CAD front view (`src/outline.json`).
 
 ## Notes
 - All geometry is procedural, built from the Karma CAD sheets. Every dimension in the code is labelled in a comment:
