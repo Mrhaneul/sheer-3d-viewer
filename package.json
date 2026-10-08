@@ -4,7 +4,7 @@
   "description": "SHEER OBJECTS interactive 3D jewelry viewer",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && vite build products/kd115 --config vite.config.js --outDir ../../dist/kd115 --emptyOutDir && vite build products/kd121 --config vite.config.js --outDir ../../dist/kd121 --emptyOutDir && vite build products/kd122 --config vite.config.js --outDir ../../dist/kd122 --emptyOutDir && vite build products/kd137 --config vite.config.js --outDir ../../dist/kd137 --emptyOutDir",
     "preview": "vite preview"
   },
   "license": "UNLICENSED",
