@@ -8,6 +8,8 @@ Live: https://mrhaneul.github.io/sheer-3d-viewer/ (pick any product from the men
 | KD-116 · Pavé huggie earring | `/` (site root) | `index.html`, `src/` |
 | KD-121 · Diamond line necklace | `/kd121/` | `products/kd121/` |
 | KD-122 · Lariat necklace | `/kd122/` | `products/kd122/` |
+| KD-133 · Thin hinged huggie | `/kd133/` | `products/kd133/` |
+| KD-134 · Chunky huggie | `/kd134/` | `products/kd134/` |
 | KD-135 · Organic loop pendant | `/kd135/` | `products/kd135/` |
 | KD-136 · Organic disc pendant | `/kd136/` | `products/kd136/` |
 | KD-137 · Domed huggie earring | `/kd137/` | `products/kd137/` |
