@@ -8,6 +8,7 @@ Live: https://mrhaneul.github.io/sheer-3d-viewer/ (pick any product from the men
 | KD-116 · Pavé huggie earring | `/` (site root) | `index.html`, `src/` |
 | KD-121 · Diamond line necklace | `/kd121/` | `products/kd121/` |
 | KD-122 · Lariat necklace | `/kd122/` | `products/kd122/` |
+| KD-135 · Organic loop pendant | `/kd135/` | `products/kd135/` |
 | KD-136 · Organic disc pendant | `/kd136/` | `products/kd136/` |
 | KD-137 · Domed huggie earring | `/kd137/` | `products/kd137/` |
 
@@ -22,4 +23,4 @@ KD-136's disc triangulation is generated during the build (`products/kd136/gen_t
   `CAD` (printed), `CAD-MEASURED` (measured from the sheet), `WEIGHT-FIT`, `REF-FIT`, `ASSUMED`, or `DECIDED`.
 - Open questions for Karma are recorded in each product's `main.js` comments.
 - `src/MeshTransmissionMaterialImpl.js` is a vanilla port of drei's MeshTransmissionMaterial (MIT), shared by every product
-  with deep-mode stones (KD-116, KD-115, KD-121, KD-122).
+  with deep-mode stones (KD-116, KD-115, KD-121, KD-122, KD-135).
