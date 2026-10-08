@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>KD-121 — diamond line necklace (r186)</title>
+<style>
+  :root{ --paper:#f4f3f0; --paper-deep:#e5e4e0; --ink:#1c1b19; --ink-soft:#8a8880; }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html,body{height:100%;overflow:hidden}
+  body{font-family:"Helvetica Neue",Helvetica,Arial,sans-serif;background:radial-gradient(120% 90% at 50% 30%, var(--paper) 0%, var(--paper-deep) 100%);color:var(--ink);-webkit-font-smoothing:antialiased}
+  #stage{position:fixed;inset:0;touch-action:none;cursor:grab}
+  .frame{position:fixed;inset:0;pointer-events:none;display:flex;flex-direction:column;justify-content:space-between;padding:28px 30px}
+  .head .brand{font-size:12px;letter-spacing:.34em;font-weight:500}
+  .head .piece{margin-top:10px;font-size:26px;font-weight:300}
+  .head .piece span{color:var(--ink-soft)}
+  .foot{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  .spec{font-size:12.5px;line-height:1.7;color:var(--ink-soft);max-width:300px}
+  .spec b{color:var(--ink);font-weight:500}
+  .metals{pointer-events:auto;display:flex;gap:22px}
+  .metals button{appearance:none;border:0;background:none;font:inherit;font-size:12.5px;letter-spacing:.06em;color:var(--ink-soft);cursor:pointer;padding:6px 0;border-bottom:1px solid transparent;transition:color .25s,border-color .25s}
+  .metals button:hover{color:var(--ink)}
+  .metals button.active{color:var(--ink);border-bottom-color:var(--ink)}
+  .hint{position:fixed;left:50%;bottom:92px;transform:translateX(-50%);font-size:12px;color:var(--ink-soft);letter-spacing:.04em;transition:opacity .8s;pointer-events:none}
+  .hint.gone{opacity:0}
+  .tag{position:fixed;top:30px;right:30px;font-size:11px;color:var(--ink-soft);letter-spacing:.08em;text-align:right;line-height:1.6;pointer-events:none}
+  @media (max-width:640px){ .frame{padding:20px} .head .piece{font-size:20px} .tag{top:20px;right:20px} .spec{font-size:11.5px} .hint{bottom:110px} }
+  .products{position:fixed;top:28px;left:50%;transform:translateX(-50%);pointer-events:auto;z-index:5}
+  .products select{appearance:none;-webkit-appearance:none;font:inherit;font-size:12px;letter-spacing:.06em;color:var(--ink);background:transparent;border:1px solid var(--ink-soft);border-radius:999px;padding:7px 30px 7px 14px;cursor:pointer;background-image:linear-gradient(45deg,transparent 50%,var(--ink-soft) 50%),linear-gradient(135deg,var(--ink-soft) 50%,transparent 50%);background-position:calc(100% - 15px) 52%,calc(100% - 10px) 52%;background-size:5px 5px,5px 5px;background-repeat:no-repeat}
+  .products select:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+  @media (max-width:640px){ .products{top:auto;bottom:150px} }
+</style>
+</head>
+<body>
+<div id="stage"></div>
+<nav class="products" aria-label="Choose a product">
+    <select aria-label="Product" onchange="location.href=this.value">
+      <option value="../kd115/">KD-115 · Pear pendant</option>
+      <option value="../">KD-116 · Pavé huggie earring</option>
+      <option value="../kd121/" selected>KD-121 · Diamond line necklace</option>
+      <option value="../kd122/">KD-122 · Lariat necklace</option>
+      <option value="../kd137/">KD-137 · Domed huggie earring</option>
+    </select>
+  </nav>
+
+<div class="frame">
+  <div class="head">
+    <div class="brand">SHEER OBJECTS</div>
+    <div class="piece">KD-121 <span>diamond line necklace</span></div>
+  </div>
+  <div class="foot">
+    <div class="spec">
+      <b>245 × 1 mm</b> round diamonds, 1.225 ct total,<br>
+      two-prong open-gallery links, 2.4 mm tall.<br>
+      Built to the CAD sheet dimensions.
+    </div>
+    <div class="metals" role="group" aria-label="Metal finish">
+      <button id="btnGold" class="active">14k gold vermeil</button>
+      <button id="btnSilver">Sterling silver</button>
+    </div>
+  </div>
+</div>
+<div class="tag">Three.js r186 build<br>synthetic studio light</div>
+<div class="hint" id="hint">Drag to rotate. Scroll or pinch to zoom.</div>
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>
