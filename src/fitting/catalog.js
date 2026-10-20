@@ -19,3 +19,7 @@ export const products = {
   kd136: () => import('../../products/kd136/src/build.gen.js'),   // Organic disc pendant (necklace)
   kd137: () => import('../../products/kd137/src/build.gen.js'),   // Domed huggie earring
 };
+
+// The viewers' "deep" stone material (KD-116 onward), shared so the Fitting Room renders stones exactly as the product
+// viewers do (crown refracting a mirror-pavilion pass; 20 Oct).
+export { MeshTransmissionMaterialImpl } from '../MeshTransmissionMaterialImpl.js';
