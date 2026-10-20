@@ -2,3 +2,6 @@ node_modules
 dist
 dist-test
 assets/*.hdr
+
+# Fitting Room builders, generated at build time from each main.js (scripts/gen-fitting-builders.mjs)
+**/build.gen.js
